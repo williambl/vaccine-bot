@@ -16,10 +16,9 @@ import java.util.zip.GZIPInputStream;
 
 public class VaccineBot {
 
-    private static long latestAmount = 0;
-    private static String apiURL = "https://coronavirus.data.gov.uk/api/v1/data?filters=areaName=United%20Kingdom;areaType=overview&latestBy=cumPeopleVaccinatedFirstDoseByPublishDate&structure={%22date%22:%22date%22,%22value%22:%22cumPeopleVaccinatedFirstDoseByPublishDate%22}";
+    private static final String apiURL = "https://coronavirus.data.gov.uk/api/v1/data?filters=areaName=United%20Kingdom;areaType=overview&latestBy=cumPeopleVaccinatedFirstDoseByPublishDate&structure={%22date%22:%22date%22,%22value%22:%22cumPeopleVaccinatedFirstDoseByPublishDate%22}";
 
-    private static Timer timer = new Timer();
+    private static final Timer timer = new Timer();
 
     public static void main(String[] args) {
         System.out.println(args[1]);
@@ -43,15 +42,16 @@ public class VaccineBot {
     }
 
     private static void checkStats(JDA bot, String channelId) {
-        long oldAmount = latestAmount;
+        long amount;
         try {
-            latestAmount = JsonParser.parseReader(new InputStreamReader(new GZIPInputStream(new URL(apiURL).openStream()))).getAsJsonObject().getAsJsonArray("data").get(0).getAsJsonObject().get("value").getAsLong();
+            amount = JsonParser.parseReader(new InputStreamReader(new GZIPInputStream(new URL(apiURL).openStream()))).getAsJsonObject().getAsJsonArray("data").get(0).getAsJsonObject().get("value").getAsLong();
         } catch (IOException e) {
             e.printStackTrace();
             Objects.requireNonNull(bot.getTextChannelById(channelId)).sendMessage("Failed to get latest stats.").queue();
+            return;
         }
 
         Objects.requireNonNull(bot.getTextChannelById(channelId))
-                .sendMessage(":tada: **Good news!**\nThere have now been "+latestAmount+" vaccinations in the UK, up by "+(latestAmount-oldAmount)+" from the last time I checked!").queue();
+                .sendMessage(":tada: **Good news!**\nThere have now been "+amount+" vaccinations in the UK! That's "+(amount/680000L)+"% of the population!").queue();
     }
 }
