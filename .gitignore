@@ -1,0 +1,36 @@
+#Directories
+/build/
+/bin/
+/cursefiles/
+/logs/
+/downloads/
+/data/
+/backups/
+
+#Hidden Directories
+.gradle/
+.settings/
+.mtj.tmp/
+.idea/
+
+#File Extensions
+*.iml
+*.ipr
+*.iws
+*.war
+*.ear
+*.class
+*.classpath
+*.project
+
+#File Types
+hs_err_pid*
+NBTExample.nbt
+Thumbs.db
+
+#Generated Files
+OCR.png
+qr.png
+diction.txt
+data/
+gradle/wrapper/gradle-wrapper.jar
