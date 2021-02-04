@@ -4,6 +4,7 @@ import com.google.gson.JsonParser;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import pl.allegro.finance.tradukisto.ValueConverters;
 
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
@@ -51,7 +52,12 @@ public class VaccineBot {
             return;
         }
 
+        int percentage = (int) (amount/680000L);
+
+        String amountAsWords = ValueConverters.ENGLISH_INTEGER.asWords((int) amount);
+
         Objects.requireNonNull(bot.getTextChannelById(channelId))
-                .sendMessage(":tada: **Good news!**\nThere have now been "+amount+" vaccinations in the UK! That's "+(amount/680000L)+"% of the population!").queue();
+                .sendMessage(":tada: **Good news!**\nThere have now been "+amount+" (that's "+amountAsWords+") vaccinations in the UK! That's "+(amount/680000L)+"% of the population!").queue();
     }
+
 }
