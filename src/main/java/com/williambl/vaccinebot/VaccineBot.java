@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
+import org.jetbrains.annotations.NotNull;
 import pl.allegro.finance.tradukisto.ValueConverters;
 
 import javax.security.auth.login.LoginException;
@@ -19,10 +20,8 @@ import java.util.TimerTask;
 import java.util.zip.GZIPInputStream;
 
 public class VaccineBot {
-
-    private static final String apiURL = "https://coronavirus.data.gov.uk/api/v1/data?filters=areaName=United%20Kingdom;areaType=overview&latestBy=cumPeopleVaccinatedFirstDoseByPublishDate&structure={%22date%22:%22date%22,%22value%22:%22cumPeopleVaccinatedFirstDoseByPublishDate%22}";
-
-    private static final Timer timer = new Timer();
+    private static final String API_URL = "https://coronavirus.data.gov.uk/api/v1/data?filters=areaName=United%20Kingdom;areaType=overview&latestBy=cumPeopleVaccinatedFirstDoseByPublishDate&structure={%22date%22:%22date%22,%22value%22:%22cumPeopleVaccinatedFirstDoseByPublishDate%22}";
+    private static final Timer TIMER = new Timer();
 
     private static JDA bot;
 
@@ -40,7 +39,7 @@ public class VaccineBot {
                     })
                     .build();
 
-            timer.scheduleAtFixedRate(new TimerTask() {
+            TIMER.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
                     checkStats(bot, args[1]);
@@ -54,7 +53,7 @@ public class VaccineBot {
         }
     }
 
-    private static void checkStats(JDA bot, String channelId) {
+    private static void checkStats(@NotNull JDA bot, String channelId) {
         TextChannel channel = bot.getTextChannelById(channelId);
         if (channel == null) {
             System.err.println("Failed to find channel with id "+channelId);
@@ -63,7 +62,7 @@ public class VaccineBot {
 
         long amount;
         try {
-            amount = JsonParser.parseReader(new InputStreamReader(new GZIPInputStream(new URL(apiURL).openStream()))).getAsJsonObject().getAsJsonArray("data").get(0).getAsJsonObject().get("value").getAsLong();
+            amount = JsonParser.parseReader(new InputStreamReader(new GZIPInputStream(new URL(API_URL).openStream()))).getAsJsonObject().getAsJsonArray("data").get(0).getAsJsonObject().get("value").getAsLong();
         } catch (IOException e) {
             e.printStackTrace();
             channel.sendMessage("Failed to get latest stats.").queue();
