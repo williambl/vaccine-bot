@@ -5,6 +5,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.EventListener;
 import pl.allegro.finance.tradukisto.ValueConverters;
 
 import javax.security.auth.login.LoginException;
@@ -21,10 +23,20 @@ public class VaccineBot {
 
     private static final Timer timer = new Timer();
 
+    private static JDA bot;
+
     public static void main(String[] args) {
         try {
-            JDA bot = JDABuilder.createDefault(args[0])
+            bot = JDABuilder.createDefault(args[0])
                     .setActivity(Activity.watching("the vaccine rollout"))
+                    .addEventListeners((EventListener) event -> {
+                        if (event instanceof MessageReceivedEvent) {
+                            MessageReceivedEvent msgEvent = (MessageReceivedEvent) event;
+                            if (!msgEvent.getAuthor().isBot() && msgEvent.getMessage().getContentRaw().startsWith(",vaccineBot")) {
+                                checkStats(bot, msgEvent.getChannel().getId());
+                            }
+                        }
+                    })
                     .build();
 
             timer.scheduleAtFixedRate(new TimerTask() {
