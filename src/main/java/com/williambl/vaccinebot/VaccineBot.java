@@ -13,6 +13,7 @@ import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.zip.GZIPInputStream;
@@ -32,7 +33,7 @@ public class VaccineBot {
                     .addEventListeners((EventListener) event -> {
                         if (event instanceof MessageReceivedEvent) {
                             MessageReceivedEvent msgEvent = (MessageReceivedEvent) event;
-                            if (!msgEvent.getAuthor().isBot() && msgEvent.getMessage().getContentRaw().startsWith(",vaccineBot")) {
+                            if (!msgEvent.getAuthor().isBot() && msgEvent.getMessage().getContentRaw().toLowerCase(Locale.ROOT).startsWith(",vaccinebot")) {
                                 checkStats(bot, msgEvent.getChannel().getId());
                             }
                         }
