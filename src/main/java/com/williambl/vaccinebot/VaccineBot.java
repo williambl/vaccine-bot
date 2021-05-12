@@ -82,11 +82,11 @@ public class VaccineBot {
         channel.sendMessage(new EmbedBuilder()
                 .setTitle("Good News!")
                 .setDescription(":tada: **Good news!**\n" +
-                        "There have now been "+total+" (that's "+toWords(total)+") vaccinations in the UK!" +
-                        ""+firstDosePercent+"% of the population now have at least one dose!")
-                .addField("Total Doses", String.valueOf(total), true)
-                .addField("First Doses", String.valueOf(firstDose), true)
-                .addField("Second Doses", String.valueOf(secondDose), true)
+                        "There have now been "+toPrettyString(total)+" (that's "+toWords(total)+") vaccinations in the UK!\n" +
+                        +firstDosePercent+"% of the population now have at least one dose.")
+                .addField("Total Doses", toPrettyString(total), true)
+                .addField("First Doses", toPrettyString(firstDose), true)
+                .addField("Second Doses", toPrettyString(secondDose), true)
                 .addField("People with one dose", firstDosePercent +"%", true)
                 .addField("People with both doses", secondDosePercent +"%", true)
                 .build()
@@ -95,5 +95,17 @@ public class VaccineBot {
 
     private static String toWords(int value) {
         return ValueConverters.ENGLISH_INTEGER.asWords(value);
+    }
+
+    private static String toPrettyString(int value) {
+        StringBuilder builder = new StringBuilder().append(value).reverse();
+        int originalLength = builder.length();
+        int offset = 0;
+        for (int i = 0; i < originalLength; i++) {
+            if (i != 0 && i % 3 == 0) {
+                builder.insert(i+offset++, ' ');
+            }
+        }
+        return builder.toString();
     }
 }
