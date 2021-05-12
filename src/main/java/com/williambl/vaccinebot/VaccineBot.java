@@ -1,6 +1,8 @@
 package com.williambl.vaccinebot;
 
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -20,7 +22,7 @@ import java.util.TimerTask;
 import java.util.zip.GZIPInputStream;
 
 public class VaccineBot {
-    private static final String API_URL = "https://coronavirus.data.gov.uk/api/v1/data?filters=areaName=United%20Kingdom;areaType=overview&latestBy=cumPeopleVaccinatedFirstDoseByPublishDate&structure={%22date%22:%22date%22,%22value%22:%22cumPeopleVaccinatedFirstDoseByPublishDate%22}";
+    private static final String API_URL = "https://coronavirus.data.gov.uk/api/v1/data?filters=areaName=United%20Kingdom;areaType=overview&latestBy=cumPeopleVaccinatedFirstDoseByPublishDate&structure={%22firstDose%22:%22cumPeopleVaccinatedFirstDoseByPublishDate%22,%20%22secondDose%22:%22cumPeopleVaccinatedSecondDoseByPublishDate%22,%20%22firstDosePercent%22:%20%22cumVaccinationFirstDoseUptakeByPublishDatePercentage%22,%20%22secondDosePercent%22:%20%22cumVaccinationSecondDoseUptakeByPublishDatePercentage%22}";
     private static final Timer TIMER = new Timer();
 
     private static JDA bot;
@@ -60,17 +62,38 @@ public class VaccineBot {
             return;
         }
 
-        long amount;
+        int firstDose;
+        int secondDose;
+        int firstDosePercent;
+        int secondDosePercent;
         try {
-            amount = JsonParser.parseReader(new InputStreamReader(new GZIPInputStream(new URL(API_URL).openStream()))).getAsJsonObject().getAsJsonArray("data").get(0).getAsJsonObject().get("value").getAsLong();
+            JsonObject values = JsonParser.parseReader(new InputStreamReader(new GZIPInputStream(new URL(API_URL).openStream()))).getAsJsonObject().getAsJsonArray("data").get(0).getAsJsonObject();
+            firstDose = values.get("firstDose").getAsInt();
+            secondDose = values.get("secondDose").getAsInt();
+            firstDosePercent = values.get("firstDosePercent").getAsInt();
+            secondDosePercent = values.get("secondDosePercent").getAsInt();
         } catch (IOException e) {
             e.printStackTrace();
             channel.sendMessage("Failed to get latest stats.").queue();
             return;
         }
-        String amountAsWords = ValueConverters.ENGLISH_INTEGER.asWords((int) amount);
+        int total = firstDose+secondDose;
 
-        channel.sendMessage(":tada: **Good news!**\nThere have now been "+amount+" (that's "+amountAsWords+") vaccinations in the UK! That's "+(amount/680000L)+"% of the population!").queue();
+        channel.sendMessage(new EmbedBuilder()
+                .setTitle("Good News!")
+                .setDescription(":tada: **Good news!**\n" +
+                        "There have now been "+total+" (that's "+toWords(total)+") vaccinations in the UK!" +
+                        ""+firstDosePercent+"% of the population now have at least one dose!")
+                .addField("Total Doses", String.valueOf(total), true)
+                .addField("First Doses", String.valueOf(firstDose), true)
+                .addField("Second Doses", String.valueOf(secondDose), true)
+                .addField("People with one dose", firstDosePercent +"%", true)
+                .addField("People with both doses", secondDosePercent +"%", true)
+                .build()
+        ).queue();
     }
 
+    private static String toWords(int value) {
+        return ValueConverters.ENGLISH_INTEGER.asWords(value);
+    }
 }
