@@ -106,6 +106,6 @@ public class VaccineBot {
                 builder.insert(i+offset++, ' ');
             }
         }
-        return builder.toString();
+        return builder.reverse().toString();
     }
 }
